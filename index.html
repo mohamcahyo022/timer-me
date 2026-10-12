@@ -16,19 +16,40 @@ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:en
 :root[data-theme="neon"]{--bg1:#05050a;--bg2:#14052b;--card:rgba(255,255,255,.05);--text:#f5f5ff;--muted:#a29bd1;--accent:#00f0ff;--track:rgba(0,240,255,.12);--btn:rgba(255,255,255,.07);--shadow:0 0 60px rgba(0,240,255,.25);--on:#001418}
 body{overflow-y:auto}
 .app{margin:auto}
-.sw{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0 4px}
+.sw{display:flex;justify-content:center;flex-wrap:wrap;margin:6px 0 4px}
+.sw button{margin:3px 5px}
 .sw button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform .2s}
 .sw button.on{border-color:var(--text);transform:scale(1.15)}
+@media (max-width:360px){
+.app{width:94vw;padding:16px 14px;border-radius:24px}
+h1{font-size:.95rem}
+.theme{width:38px;height:38px;font-size:1.05rem}
+.sw button{width:26px;height:26px;margin:2px 4px}
+.adj{margin:4px 0 10px}
+.adj button{width:46px;height:46px}
+.presets{margin-bottom:12px}
+.presets button{padding:7px 12px}
+.main button{padding:14px}
+.hint{font-size:.7rem;margin-top:12px}
+}
+@media (orientation:portrait) and (max-height:540px){.hint{display:none}}
 @media (orientation:landscape) and (max-height:560px){
 .app{width:min(94vw,760px);padding:16px 22px;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"h s" "r a" "r p" "r m" "n n";column-gap:28px;align-items:center;border-radius:28px}
 header{grid-area:h;margin-bottom:0}
 .sw{grid-area:s;justify-content:flex-end;margin:0}
-.ring{grid-area:r;width:200px;height:200px;margin:0}
+.ring{grid-area:r;width:min(200px,52vh);height:min(200px,52vh);margin:0}
 .time b{font-size:2.6rem}
 .adj{grid-area:a;margin:0 0 10px}
 .presets{grid-area:p;margin-bottom:12px}
 .main{grid-area:m}
 .hint{grid-area:n;margin:10px 0 0}
+}
+@media (orientation:landscape) and (max-height:360px){
+.hint{display:none}
+.app{padding:12px 20px}
+.sw button{width:24px;height:24px}
+.adj button{width:44px;height:44px}
+.main button{padding:12px}
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
@@ -37,21 +58,24 @@ body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 h1{font-size:1.05rem;margin:0;font-weight:600;letter-spacing:.3px}
 .theme{border:0;background:var(--btn);color:var(--text);width:42px;height:42px;border-radius:50%;font-size:1.2rem;cursor:pointer}
-.ring{position:relative;width:240px;height:240px;margin:12px auto}
+.ring{position:relative;width:min(240px,64vw,34vh);height:min(240px,64vw,34vh);margin:12px auto}
 svg{width:100%;height:100%;transform:rotate(-90deg)}
 circle{fill:none;stroke-width:12;stroke-linecap:round}
 .t{stroke:var(--track)}
 .p{stroke:var(--accent);stroke-dasharray:565.48;stroke-dashoffset:0;transition:stroke-dashoffset .3s linear,stroke .5s}
-.time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.time b{font-size:3.2rem;font-variant-numeric:tabular-nums;font-weight:700}
+.time{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.time b{font-size:min(3.2rem,9.5vh);font-variant-numeric:tabular-nums;font-weight:700}
 .time span{color:var(--muted);font-size:.85rem;margin-top:2px}
-.adj{display:flex;justify-content:center;align-items:center;gap:14px;margin:6px 0 14px}
+.adj{display:flex;justify-content:center;align-items:center;margin:6px 0 14px}
+.adj>*{margin:0 7px}
 .adj button,.presets button{border:0;background:var(--btn);color:var(--text);cursor:pointer;font-weight:600}
 .adj button{width:52px;height:52px;border-radius:50%;font-size:1.5rem}
 .adj .m{min-width:90px;font-size:1.1rem}
-.presets{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.presets{display:flex;justify-content:center;margin-bottom:16px}
+.presets button{margin:0 4px}
 .presets button{padding:8px 14px;border-radius:999px;font-size:.85rem}
-.main{display:flex;gap:10px}
+.main{display:flex}
+.main button+button{margin-left:10px}
 .main button{flex:1;padding:16px;border:0;border-radius:18px;font-size:1rem;font-weight:700;cursor:pointer}
 #go{background:var(--accent);color:var(--on,#fff)}
 #rs{background:var(--btn);color:var(--text);flex:.5}
@@ -159,9 +183,11 @@ function adjust(d){
   if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}
 }
 
+var AC=null;
+function unlock(){try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.resume)AC.resume()}catch(e){}}
 function beep(){
   try{
-    var ac=new(window.AudioContext||window.webkitAudioContext)();
+    unlock();var ac=AC;
     [0,.3,.6].forEach(function(t){
       var o=ac.createOscillator(),g=ac.createGain();
       o.frequency.value=880;o.connect(g);g.connect(ac.destination);
@@ -179,6 +205,7 @@ function tick(){
   if(remaining<=0)finish();
 }
 function start(){
+  unlock();
   if(remaining<=0)remaining=total;
   endAt=Date.now()+remaining*1000;
   running=true;app.classList.remove('done');
