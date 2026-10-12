@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Timer Belajar</title>
+<style>
+:root{--bg1:#fdf3e3;--bg2:#ffd9b0;--card:rgba(255,255,255,.65);--text:#2b2118;--muted:#7a6a5a;--accent:#f4733a;--track:rgba(43,33,24,.1);--btn:#fff;--shadow:0 20px 60px rgba(244,115,58,.25);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="dark"]{--bg1:#0b1020;--bg2:#1b1f4a;--card:rgba(255,255,255,.07);--text:#eef0ff;--muted:#9aa0c8;--accent:#8b8cff;--track:rgba(255,255,255,.1);--btn:rgba(255,255,255,.08);--shadow:0 20px 60px rgba(0,0,0,.5)}
+:root[data-theme="laut"]{--bg1:#e0f4ff;--bg2:#7fd1f0;--card:rgba(255,255,255,.55);--text:#0b2b3d;--muted:#4d7388;--accent:#0a8fd6;--track:rgba(11,43,61,.1);--btn:#fff;--shadow:0 20px 60px rgba(10,143,214,.3)}
+:root[data-theme="hutan"]{--bg1:#07160f;--bg2:#12402a;--card:rgba(255,255,255,.07);--text:#e6f6ec;--muted:#8fb9a0;--accent:#4ade80;--track:rgba(255,255,255,.1);--btn:rgba(255,255,255,.08);--shadow:0 20px 60px rgba(0,0,0,.5);--on:#052e16}
+:root[data-theme="sakura"]{--bg1:#fff0f5;--bg2:#ffc2d9;--card:rgba(255,255,255,.6);--text:#3b1624;--muted:#86596b;--accent:#e5457f;--track:rgba(59,22,36,.1);--btn:#fff;--shadow:0 20px 60px rgba(229,69,127,.25)}
+:root[data-theme="senja"]{--bg1:#2d1b4e;--bg2:#e8704a;--card:rgba(255,255,255,.12);--text:#fff5ec;--muted:#f2cdb8;--accent:#ffd166;--track:rgba(255,255,255,.18);--btn:rgba(255,255,255,.15);--shadow:0 20px 60px rgba(0,0,0,.35);--on:#3a1d00}
+:root[data-theme="kopi"]{--bg1:#f3e9dc;--bg2:#c9a27e;--card:rgba(255,255,255,.5);--text:#3e2a1c;--muted:#7d6350;--accent:#8a5230;--track:rgba(62,42,28,.12);--btn:rgba(255,255,255,.7);--shadow:0 20px 60px rgba(138,82,48,.3)}
+:root[data-theme="neon"]{--bg1:#05050a;--bg2:#14052b;--card:rgba(255,255,255,.05);--text:#f5f5ff;--muted:#a29bd1;--accent:#00f0ff;--track:rgba(0,240,255,.12);--btn:rgba(255,255,255,.07);--shadow:0 0 60px rgba(0,240,255,.25);--on:#001418}
+body{overflow-y:auto}
+.app{margin:auto}
+.sw{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0 4px}
+.sw button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform .2s}
+.sw button.on{border-color:var(--text);transform:scale(1.15)}
+@media (orientation:landscape) and (max-height:560px){
+.app{width:min(94vw,760px);padding:16px 22px;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"h s" "r a" "r p" "r m" "n n";column-gap:28px;align-items:center;border-radius:28px}
+header{grid-area:h;margin-bottom:0}
+.sw{grid-area:s;justify-content:flex-end;margin:0}
+.ring{grid-area:r;width:200px;height:200px;margin:0}
+.time b{font-size:2.6rem}
+.adj{grid-area:a;margin:0 0 10px}
+.presets{grid-area:p;margin-bottom:12px}
+.main{grid-area:m}
+.hint{grid-area:n;margin:10px 0 0}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:linear-gradient(160deg,var(--bg1),var(--bg2));background-color:var(--bg1);color:var(--text);display:flex;align-items:center;justify-content:center;transition:background .5s,color .5s}
+.app{width:min(92vw,400px);padding:24px;border-radius:32px;background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--shadow);text-align:center}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+h1{font-size:1.05rem;margin:0;font-weight:600;letter-spacing:.3px}
+.theme{border:0;background:var(--btn);color:var(--text);width:42px;height:42px;border-radius:50%;font-size:1.2rem;cursor:pointer}
+.ring{position:relative;width:240px;height:240px;margin:12px auto}
+svg{width:100%;height:100%;transform:rotate(-90deg)}
+circle{fill:none;stroke-width:12;stroke-linecap:round}
+.t{stroke:var(--track)}
+.p{stroke:var(--accent);stroke-dasharray:565.48;stroke-dashoffset:0;transition:stroke-dashoffset .3s linear,stroke .5s}
+.time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.time b{font-size:3.2rem;font-variant-numeric:tabular-nums;font-weight:700}
+.time span{color:var(--muted);font-size:.85rem;margin-top:2px}
+.adj{display:flex;justify-content:center;align-items:center;gap:14px;margin:6px 0 14px}
+.adj button,.presets button{border:0;background:var(--btn);color:var(--text);cursor:pointer;font-weight:600}
+.adj button{width:52px;height:52px;border-radius:50%;font-size:1.5rem}
+.adj .m{min-width:90px;font-size:1.1rem}
+.presets{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+.presets button{padding:8px 14px;border-radius:999px;font-size:.85rem}
+.main{display:flex;gap:10px}
+.main button{flex:1;padding:16px;border:0;border-radius:18px;font-size:1rem;font-weight:700;cursor:pointer}
+#go{background:var(--accent);color:var(--on,#fff)}
+#rs{background:var(--btn);color:var(--text);flex:.5}
+button:active{transform:scale(.96)}
+.hint{margin:16px 0 0;font-size:.75rem;color:var(--muted);line-height:1.5}
+.done .p{stroke:#2fbf71}
+</style>
+</head>
+<body>
+<main class="app" id="app">
+  <header>
+    <h1>📚 Timer Belajar</h1>
+    <button class="theme" id="theme" aria-label="Ganti tema">🌙</button>
+  </header>
+  <div class="sw" id="sw"></div>
+  <div class="ring">
+    <svg viewBox="0 0 200 200"><circle class="t" cx="100" cy="100" r="90"/><circle class="p" id="ring" cx="100" cy="100" r="90"/></svg>
+    <div class="time"><b id="disp">25:00</b><span id="status">Siap belajar</span></div>
+  </div>
+  <div class="adj">
+    <button id="minus" aria-label="Kurangi 1 menit">−</button>
+    <div class="m"><span id="mins">25</span> menit</div>
+    <button id="plus" aria-label="Tambah 1 menit">+</button>
+  </div>
+  <div class="presets">
+    <button data-m="15">15</button><button data-m="25">25</button><button data-m="45">45</button><button data-m="60">60</button>
+  </div>
+  <div class="main">
+    <button id="go">Mulai</button>
+    <button id="rs">Reset</button>
+  </div>
+  <p class="hint">Tombol <b>Volume +/−</b> = tambah/kurangi 1 menit (jika didukung browser HP). Cadangan: tombol +/− di layar atau panah ↑↓ di keyboard.</p>
+</main>
+<script>
+(function(){
+var MIN=1,MAX=180,C=565.48;
+var total=25*60,remaining=total,running=false,endAt=0,timer=null;
+var $=function(i){return document.getElementById(i)};
+var disp=$('disp'),ring=$('ring'),status=$('status'),mins=$('mins'),go=$('go'),app=$('app'),themeBtn=$('theme');
+
+function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+
+/* Tema: pagi / malam */
+var THEMES=[
+['light','Pagi','linear-gradient(135deg,#fdf3e3,#f4733a)'],
+['dark','Malam','linear-gradient(135deg,#0b1020,#8b8cff)'],
+['laut','Laut','linear-gradient(135deg,#e0f4ff,#0a8fd6)'],
+['hutan','Hutan','linear-gradient(135deg,#07160f,#4ade80)'],
+['sakura','Sakura','linear-gradient(135deg,#fff0f5,#e5457f)'],
+['senja','Senja','linear-gradient(135deg,#2d1b4e,#e8704a)'],
+['kopi','Kopi','linear-gradient(135deg,#f3e9dc,#8a5230)'],
+['neon','Neon','linear-gradient(135deg,#05050a,#00f0ff)']
+];
+var sw=$('sw');
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  themeBtn.textContent=t==='dark'?'☀️':'🌙';
+  Array.prototype.forEach.call(sw.children,function(b){b.classList.toggle('on',b.dataset.t===t)});
+  save('tb-theme',t);
+}
+THEMES.forEach(function(x){
+  var b=document.createElement('button');
+  b.dataset.t=x[0];b.title=x[1];b.setAttribute('aria-label','Tema '+x[1]);
+  b.style.background=x[2];
+  b.onclick=function(){setTheme(x[0])};
+  sw.appendChild(b);
+});
+var saved=load('tb-theme');
+if(THEMES.some(function(x){return x[0]===saved})){setTheme(saved)}else{
+  var h=new Date().getHours();
+  setTheme(h>=6&&h<18?'light':'dark');
+}
+themeBtn.onclick=function(){
+  setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+};
+
+var m0=parseInt(load('tb-min'),10);
+if(m0>=MIN&&m0<=MAX){total=remaining=m0*60}
+
+function fmt(s){
+  var m=Math.floor(s/60),x=s%60;
+  return (m<10?'0':'')+m+':'+(x<10?'0':'')+x;
+}
+function render(){
+  disp.textContent=fmt(remaining);
+  mins.textContent=Math.round(total/60);
+  ring.style.strokeDashoffset=C*(1-(total?remaining/total:0));
+  document.title=(running?fmt(remaining)+' · ':'')+'Timer Belajar';
+}
+
+function adjust(d){
+  var newTotal=total+d*60;
+  if(newTotal<MIN*60||newTotal>MAX*60)return;
+  if(running){
+    if(remaining+d*60<=0)return;
+    endAt+=d*60000;total=newTotal;remaining+=d*60;
+  }else{
+    total=remaining=newTotal;
+    app.classList.remove('done');
+    status.textContent='Siap belajar';
+  }
+  save('tb-min',Math.round(total/60));
+  render();
+  if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}
+}
+
+function beep(){
+  try{
+    var ac=new(window.AudioContext||window.webkitAudioContext)();
+    [0,.3,.6].forEach(function(t){
+      var o=ac.createOscillator(),g=ac.createGain();
+      o.frequency.value=880;o.connect(g);g.connect(ac.destination);
+      g.gain.setValueAtTime(.2,ac.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.25);
+      o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.25);
+    });
+  }catch(e){}
+  if(navigator.vibrate)try{navigator.vibrate([200,100,200,100,400])}catch(e){}
+}
+
+function tick(){
+  remaining=Math.max(0,Math.ceil((endAt-Date.now())/1000));
+  render();
+  if(remaining<=0)finish();
+}
+function start(){
+  if(remaining<=0)remaining=total;
+  endAt=Date.now()+remaining*1000;
+  running=true;app.classList.remove('done');
+  go.textContent='Jeda';status.textContent='Fokus…';
+  clearInterval(timer);timer=setInterval(tick,250);
+}
+function pause(){
+  running=false;clearInterval(timer);
+  go.textContent='Lanjut';status.textContent='Dijeda';render();
+}
+function finish(){
+  running=false;clearInterval(timer);
+  go.textContent='Mulai';status.textContent='Selesai! Istirahat dulu 🎉';
+  app.classList.add('done');beep();render();
+}
+function reset(){
+  running=false;clearInterval(timer);
+  remaining=total;app.classList.remove('done');
+  go.textContent='Mulai';status.textContent='Siap belajar';render();
+}
+
+go.onclick=function(){running?pause():start()};
+$('rs').onclick=reset;
+$('plus').onclick=function(){adjust(1)};
+$('minus').onclick=function(){adjust(-1)};
+Array.prototype.forEach.call(document.querySelectorAll('.presets button'),function(b){
+  b.onclick=function(){
+    if(running)return;
+    total=remaining=parseInt(b.dataset.m,10)*60;
+    save('tb-min',b.dataset.m);app.classList.remove('done');
+    status.textContent='Siap belajar';render();
+  };
+});
+
+/* Tombol volume HP (jika browser/wrapper meneruskan eventnya) + panah keyboard */
+window.addEventListener('keydown',function(e){
+  var k=e.key,c=e.code;
+  if(k==='AudioVolumeUp'||c==='AudioVolumeUp'||k==='VolumeUp'||e.keyCode===175||k==='ArrowUp'){
+    e.preventDefault();adjust(1);
+  }else if(k==='AudioVolumeDown'||c==='AudioVolumeDown'||k==='VolumeDown'||e.keyCode===174||k==='ArrowDown'){
+    e.preventDefault();adjust(-1);
+  }else if(k===' '&&e.target===document.body){
+    e.preventDefault();running?pause():start();
+  }
+},true);
+
+document.addEventListener('visibilitychange',function(){if(running)tick()});
+render();
+})();
+</script>
+</body>
+</html>
